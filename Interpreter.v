@@ -28,12 +28,41 @@ Notation "'LETOPT' x <== e1 'IN' e2"
              you are strongly encouraged to define auxiliary notation.
              See the notation LETOPT in the ImpCEval chapter.
 *)
+Notation "'LETOPT' st , c <== e1 'IN' e2"
+  := (match e1 with
+          | Fail => Fail
+          | OutOfGas => OutOfGas
+          | Success (st,c) => e2
+       end)
+(right associativity, at level 60).
 
 Fixpoint ceval_step (st : state) (c : com) (continuation: list (state * com)) (i : nat)
                     : interpreter_result :=
   match i with
-  | (* TODO *)
-  | (* TODO *)
+  | 0 => OutOfGas
+  | S i' => match c with
+            | <{skip}> => Success (st,continuation)
+            | <{ var := v }> =>  Success ((var !-> aeval st v ; st),continuation)
+            | <{c1 ; c2}> => LETOPT st', cont' <== ceval_step st c1 continuation i' IN ceval_step st' c2 cont' i'
+                                          
+            | <{if b then c1 else c2 end }> => if (beval st b)
+                                                then ceval_step st c1 continuation i'
+                                                else ceval_step st c2 continuation i'
+            | <{while b do c1 end}> => if (beval st b)
+                                        then LETOPT st', cont' <== ceval_step st c1 continuation  i' IN ceval_step st' c  cont' i'
+                                        else Success (st,continuation)
+            | <{(c1 !! c2)}> => ceval_step st c1 ((st,c2)::continuation) i'
+            | <{b -> c1}> => if (beval st b)
+                            then ceval_step st c1 continuation i'
+                            else match continuation with
+                                  | nil => Fail
+                                  | (state',c2)::cont' => ceval_step state' <{c2;c}> cont' i'
+                                  end
+                                                      
+                  
+                                
+
+            end
   end.
 
 
@@ -114,7 +143,15 @@ Theorem p1_equals_p2: forall st cont,
   (exists i0,
     (forall i1, i1 >= i0 -> ceval_step st p1 cont i1 =  ceval_step st p2 cont i1)).
 Proof.
-  (* TODO *)
+  intros st cont.
+  exists 5.
+  intros i1 H.
+  destruct i1; try lia.
+  destruct i1; try lia.
+  destruct i1; try lia.
+  destruct i1; try lia.
+  destruct i1; try lia.
+  reflexivity.
 Qed.
 
 
@@ -127,5 +164,33 @@ Theorem ceval_step_more: forall i1 i2 st st' c cont cont',
   ceval_step st c cont i1 = Success (st', cont') ->
   ceval_step st c cont i2 = Success (st', cont').
 Proof.
-  (* TODO *)
-Qed.
+  induction i1 as [| i1' IH]; intros i2 st st' c cont cont' Hle Hceval.
+  -discriminate Hceval.
+  -destruct i2 as [|i2']. inversion Hle.
+  assert (Hle': i1' <= i2') by lia.
+  destruct c.
+  -- simpl. simpl in Hceval. inversion Hceval. reflexivity.
+  -- simpl. simpl in Hceval. inversion Hceval. reflexivity.
+  -- simpl. simpl in Hceval. destruct (ceval_step st c1 cont i1') eqn:Heqst1'o;
+  try discriminate.
+  --- destruct s as [st'' cont''].
+      apply (IH i2') in Heqst1'o; try assumption.
+      rewrite Heqst1'o. simpl. simpl in Hceval.
+      apply (IH i2') in Hceval; try assumption.
+  -- simpl in Hceval. simpl.
+    destruct (beval st b); apply (IH i2') in Hceval;
+    assumption.
+  -- simpl in Hceval. simpl.
+    destruct (beval st b); try assumption.
+    destruct (ceval_step st c cont i1') eqn: Heqst1'o; try simpl in Hceval; try discriminate Hceval.
+    destruct s as [st'' cont'']. apply (IH i2') in Heqst1'o; try assumption.
+    rewrite -> Heqst1'o. simpl. simpl in Hceval.
+    apply (IH i2') in Hceval; try assumption.
+  --simpl. apply (IH i2') in Hceval; assumption.
+  -- destruct (beval st b) eqn:Hb.
+  --- simpl. simpl in Hceval. rewrite Hb. apply (IH i2'); try assumption.
+  generalize dependent Hceval. rewrite Hb. intros Hceval. assumption.
+  --- simpl.  simpl in Hceval. generalize dependent Hceval. rewrite Hb. destruct cont.
+  ----intro Hceval. discriminate Hceval.
+  ---- intro. destruct p. apply (IH i2') in Hceval; assumption.
+ Qed.
