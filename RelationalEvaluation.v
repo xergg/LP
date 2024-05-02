@@ -195,53 +195,61 @@ Lemma cequiv_ex1:
 <{ X := 2; X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-split; eexists.
+split.
+  - eexists.
     inversion H; subst.
-      inversion H2; subst. 
-      inversion H8; subst. 
-      -- inversion H10; subst. 
-          eapply E_Asg. reflexivity.
-      -- (simpl in H9. discriminate.
-      -- discriminate.
-  - inversion H; subst. 
-    eapply E_Seq . 
-      -- apply E_Asg. simpl. reflexivity. 
-      -- apply E_CondGuardTrue.
-        ---  simpl. reflexivity. 
-        ---  apply E_Skip.
+    inversion H2; subst; simpl in H2.
+    inversion H8; subst; simpl in H8.
+    inversion H10; subst; simpl in H10.
+    -- eapply E_Asg. reflexivity.
+    -- discriminate.
+    -- discriminate.
+  - eexists.
+    inversion H; subst.
+    eapply E_Seq.
+      -- apply E_Asg. reflexivity.
+      -- simpl. apply E_GuardTrue.
+        --- reflexivity.
+        --- apply E_Skip.
 Qed.
 
 Lemma cequiv_ex2:
 <{ (X := 1 !! X := 2); X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-  split; intros st1 st2 q1 q2 r H.
-    -
-    inversion H; subst. 
-    inversion H2; subst.
-    --
-      inversion H9; subst.    
-      inversion H8; subst.
+split.
+  - unfold cequiv_imp. intros.
+    inversion H; subst.
+    inversion H2; subst; simpl in H2. 
+    inversion H9; subst; simpl in H9.
+    inversion H8; subst; simpl in H8.
+    inversion H11; subst; simpl in H11.
+    (* Choice 1 - Guard true *)
+    -- discriminate.
+    (* Choice 1 - Guard false *)
+    -- inversion H14; subst. 
+       inversion H4; subst.
+       inversion H5; subst.
+       eexists.
+       eapply Asg. reflexivity.
+    -- inversion H9; subst; simpl in H9.
+       inversion H8; subst.
+       eexists.
+      (* Choice 2 - Guard true *)
       --- inversion H11; subst.
-          discriminate.
-      ---  inversion H13; subst.
-          inversion H14; subst.
-          inversion H6; subst.
-          ---- eexists. apply E_Asg. reflexivity.
-          ---- discriminate.
-    -- 
-      inversion H8; subst.    
-      ---  inversion H11; subst. inversion H8; subst.
-        ---- inversion H9; subst. eexists. apply E_Asg. reflexivity.
-        ---- inversion H9; subst. eexists. apply E_Asg. reflexivity.
-      ---  inversion H9; subst. 
-          ---- discriminate.
-   -  inversion H; subst.
-    eexists.
-     eapply E_Seq .
-      --  apply E_NDet2. apply E_Ass. reflexivity.
-      --  apply E_GuardTrue. reflexivity.
-    apply E_Skip.
+          inversion H3; subst.
+          eapply E_Asg. reflexivity.
+      (* Choice 2 - Guard false *)
+      --- discriminate.  
+  - eexists.
+    inversion H; subst; simpl in H.
+    simpl.
+    eapply E_Seq.
+    -- eapply E_NDet2. 
+       eapply E_Asg. reflexivity.
+    -- eapply E_GuardTrue; 
+       try reflexivity.
+       eapply E_Skip.
 Qed.
 
 
