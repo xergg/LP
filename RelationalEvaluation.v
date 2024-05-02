@@ -60,31 +60,31 @@ Inductive ceval : com -> state -> list (state * com) ->
 
 | E_WL : forall st st' st'' b c q q' q'',
   beval st b = true ->
-  st / q =[ c ]=> st' / q' / Success ->
+  st / q =[ c ]=> st' / q1 / Success ->
   st' / q' =[ while b do c end ]=> st'' / q'' / Success ->
   st / q =[ while b do c end ]=> st'' / q'' / Success
 
-| E_NonDet : forall st st' q q' c c' r,
+| E_NDet : forall st st' q q' c c' r,
   st / q =[ c ]=> st' / q' / r ->
   st / q =[ c !! c' ]=> st' / ((st,c') :: q') / r
 
-| E_NonDet2 : forall st st' q q' c c' r,
+| E_NDet2 : forall st st' q q' c c' r,
   st / q =[ c' ]=> st' / q' / r ->
   st / q =[ c !! c' ]=> st' / ((st,c) :: q') / r
 
-| E_CondGuardTrue : forall st st' b c q q',
+| E_GuardTrue : forall st st' b c q q',
   beval st b = true ->
   st / q =[ c ]=> st' / q' / Success ->
   st / q =[ b -> c ]=> st' / q' / Success
 
-| E_GuardFalseEmpty : forall st st' b c,
+| E_FalseEmpty : forall st st' b c,
   beval st b = false ->
   st / [] =[ b -> c ]=> st' / [] / Fail
 
-| E_CondGuardFalse : forall st st' st'' st''' d b c q q' q'',
+| E_GuardFalse : forall st st' st'' st''' d b c q q' q'',
   beval st b = false ->
   st' / q =[ d ]=> st'' / q' / Success ->
-  st'' / q' =[ b -> c ]=> st''' / q'' / Success ->
+  st2 / q' =[ b -> c ]=> st''' / q'' / Success ->
   st / ((st', d) :: q) =[  b -> c  ]=> st''' / q'' / Success
 (* TODO. Hint: follow the same structure as shown in the chapter Imp *)
 where "st1 '/' q1 '=[' c ']=>' st2 '/' q2 '/' r" := (ceval c st1 q1 r st2 q2).
@@ -119,7 +119,10 @@ empty_st / [] =[
    (X = 1) -> X:=3
 ]=> (empty_st) / [] / Fail.
 Proof.
-  (* TODO *)
+  eapply E_Seq.
+    - apply E_Asg. reflexivity.
+    - apply E_FalseEmpty.
+    - reflexivity.
 Qed. 
 
 Example ceval_example_guard2:
@@ -128,7 +131,11 @@ empty_st / [] =[
    (X = 2) -> X:=3
 ]=> (X !-> 3 ; X !-> 2) / [] / Success.
 Proof.
-  (* TODO *)
+  eapply E_Seq.
+  - apply E_Asg. reflexivity.
+  - apply E_GuardTrue.
+  -- reflexivity.
+  -- apply E_Asg. reflexivity.
 Qed. 
 
 Example ceval_example_guard3: exists q,
@@ -137,7 +144,14 @@ empty_st / [] =[
    (X = 2) -> X:=3
 ]=> (X !-> 3) / q / Success.
 Proof.
-  (* TODO *)
+  eexists.
+  eapply E_Seq.
+    - apply E_NDet2.
+      apply E_Asg. reflexivity.
+    - replace (X !-> 3) with (X !-> 3; X !-> 2); try apply t_update_shadow.
+    - apply E_GuardTrue.
+    -- reflexivity.
+    -- apply E_Asg. reflexivity.
 Qed.
     
 Example ceval_example_guard4: exists q,
@@ -146,7 +160,16 @@ empty_st / [] =[
    (X = 2) -> X:=3
 ]=> (X !-> 3) / q / Success.
 Proof.
-  (* TODO *)
+  eexists.
+  eapply E_Seq.
+  - apply E_NDet.
+    apply E_Asg. reflexivity.
+    - eapply E_GuardFalse
+      -- simpl. reflexivity.
+      -- apply E_Asg. reflexivity.
+      -- apply E_GuardTrue. reflexivity.
+      --- replace (X !-> 3) with (X !-> 3; X !-> 2); try apply t_update_shadow. (* for correct state update *)
+          apply E_Asg. simpl. reflexivity.
 Qed.
 
 
