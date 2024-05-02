@@ -121,8 +121,7 @@ empty_st / [] =[
 Proof.
   eapply E_Seq.
     - apply E_Asg. reflexivity.
-    - apply E_FalseEmpty.
-    - reflexivity.
+    - apply E_FalseEmpty. reflexivity.
 Qed. 
 
 Example ceval_example_guard2:
