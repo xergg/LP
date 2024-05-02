@@ -216,10 +216,10 @@ Lemma cequiv_ex2:
 <{ X := 2 }>.
 Proof.
   split; intros st1 st2 q1 q2 r H.
-    
+    -
     inversion H; subst. 
     inversion H2; subst.
-    
+    --
       inversion H9; subst.    
       inversion H8; subst.
       --- inversion H11; subst.
