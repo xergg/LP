@@ -35,57 +35,57 @@ Inductive ceval : com -> state -> list (state * com) ->
 | E_Skip : forall st q,
  st / q =[ skip ]=> st / q / Success
 
-| E_Ass  : forall st a1 n x q,
+| E_Ass  : forall st a1 n q x,
   aeval st a1 = n ->
   st / q =[ x := a1 ]=> (x !-> n; st) / q / Success
 
-| E_Seq : forall c1 c2 st st' st'' q q1 q2 r,
-  st / q =[ c1 ]=> st' / q1 / Success ->
-  st' / q1 =[ c2 ]=> st'' / q2 / r ->
-  st / q =[ c1 ; c2 ]=> st'' / q2 / r
+| E_Seq : forall c c' st st' st'' q q' q'' r,
+  st / q =[ c ]=> st' / q' / Success ->
+  st' / q' =[ c' ]=> st'' / q'' / r ->
+  st / q =[ c ; c' ]=> st'' / q'' / r
 
-| E_IfTrue : forall st st' b c1 c2 q q1,
+| E_IfTrue : forall st st' b c c' q q',
   beval st b = true ->
-  st / q =[ c1 ]=> st' / q1 / Success ->
-  st / q =[ if b then c1 else c2 end ]=> st' / q1 / Success
+  st / q =[ c ]=> st' / q' / Success ->
+  st / q =[ if b then c else c' end ]=> st' / q' / Success
 
-| E_IfFalse : forall st st' b c1 c2 q q1,
+| E_IfFalse : forall st st' b c c' q q',
   beval st b = false ->
-  st / q =[ c2 ]=> st' / q1 / Success ->
-  st / q =[ if b then c1 else c2 end ]=> st' / q1 / Success
+  st / q =[ c' ]=> st' / q' / Success ->
+  st / q =[ if b then c else c' end ]=> st' / q' / Success
 
 | E_WhileEnd : forall b st c q,
   beval st b = false ->
   st / q =[ while b do c end ]=> st / q / Success
 
-| E_WhileLoop : forall st st' st'' b c q q1 q2,
+| E_WhileLoop : forall st st' st'' b c q q' q'',
   beval st b = true ->
   st / q =[ c ]=> st' / q1 / Success ->
-  st' / q1 =[ while b do c end ]=> st'' / q2 / Success ->
-  st / q =[ while b do c end ]=> st'' / q2 / Success
+  st' / q' =[ while b do c end ]=> st'' / q'' / Success ->
+  st / q =[ while b do c end ]=> st'' / q'' / Success
 
-| E_NonDet : forall st st' q q' c1 c2 r,
-  st / q =[ c1 ]=> st' / q' / r ->
-  st / q =[ c1 !! c2 ]=> st' / ((st,c2) :: q') / r
+| E_NonDet : forall st st' q q' c c' r,
+  st / q =[ c ]=> st' / q' / r ->
+  st / q =[ c !! c' ]=> st' / ((st,c') :: q') / r
 
-| E_NonDet2 : forall st st' q q' c1 c2 r,
-  st / q =[ c2 ]=> st' / q' / r ->
-  st / q =[ c1 !! c2 ]=> st' / ((st,c1) :: q') / r
+| E_NonDet2 : forall st st' q q' c c' r,
+  st / q =[ c' ]=> st' / q' / r ->
+  st / q =[ c !! c' ]=> st' / ((st,c) :: q') / r
 
-| E_CondGuardTrue : forall st st' b c1 q q1,
+| E_CondGuardTrue : forall st st' b c q q',
   beval st b = true ->
-  st / q =[ c1 ]=> st' / q1 / Success ->
-  st / q =[ b -> c1 ]=> st' / q1 / Success
+  st / q =[ c ]=> st' / q' / Success ->
+  st / q =[ b -> c ]=> st' / q' / Success
 
-| E_CondGuardFalse1 : forall st st' b c1,
+| E_CondGuardFalse1 : forall st st' b c,
   beval st b = false ->
-  st / [] =[ b -> c1 ]=> st' / [] / Fail
+  st / [] =[ b -> c ]=> st' / [] / Fail
 
-| E_CondGuardFalse2 : forall st st1 st2 st3 d b c q q2 q3,
+| E_CondGuardFalse2 : forall st st' st'' st''' d b c q q' q'',
   beval st b = false ->
-  st1 / q =[ d ]=> st2 / q2 / Success ->
-  st2 / q2 =[ b -> c ]=> st3 / q3 / Success ->
-  st / ((st1, d) :: q) =[  b -> c  ]=> st3 / q3 / Success
+  st' / q =[ d ]=> st'' / q' / Success ->
+  st2 / q' =[ b -> c ]=> st''' / q'' / Success ->
+  st / ((st', d) :: q) =[  b -> c  ]=> st''' / q'' / Success
 (* TODO. Hint: follow the same structure as shown in the chapter Imp *)
 where "st1 '/' q1 '=[' c ']=>' st2 '/' q2 '/' r" := (ceval c st1 q1 r st2 q2).
 
