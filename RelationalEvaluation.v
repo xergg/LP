@@ -35,7 +35,7 @@ Inductive ceval : com -> state -> list (state * com) ->
 | E_Skip : forall st q,
  st / q =[ skip ]=> st / q / Success
 
-| E_Ass  : forall st a1 n q x,
+| E_Asg  : forall st a1 n q x,
   aeval st a1 = n ->
   st / q =[ x := a1 ]=> (x !-> n; st) / q / Success
 
@@ -54,11 +54,11 @@ Inductive ceval : com -> state -> list (state * com) ->
   st / q =[ c' ]=> st' / q' / Success ->
   st / q =[ if b then c else c' end ]=> st' / q' / Success
 
-| E_WhileEnd : forall b st c q,
+| E_WE : forall b st c q,
   beval st b = false ->
   st / q =[ while b do c end ]=> st / q / Success
 
-| E_WhileLoop : forall st st' st'' b c q q' q'',
+| E_WL : forall st st' st'' b c q q' q'',
   beval st b = true ->
   st / q =[ c ]=> st' / q1 / Success ->
   st' / q' =[ while b do c end ]=> st'' / q'' / Success ->
@@ -77,11 +77,11 @@ Inductive ceval : com -> state -> list (state * com) ->
   st / q =[ c ]=> st' / q' / Success ->
   st / q =[ b -> c ]=> st' / q' / Success
 
-| E_CondGuardFalse1 : forall st st' b c,
+| E_GuardFalseEmpty : forall st st' b c,
   beval st b = false ->
   st / [] =[ b -> c ]=> st' / [] / Fail
 
-| E_CondGuardFalse2 : forall st st' st'' st''' d b c q q' q'',
+| E_CondGuardFalse : forall st st' st'' st''' d b c q q' q'',
   beval st b = false ->
   st' / q =[ d ]=> st'' / q' / Success ->
   st2 / q' =[ b -> c ]=> st''' / q'' / Success ->
@@ -105,7 +105,11 @@ if (X <= 1)
 end
 ]=> (Z !-> 4 ; X !-> 2) / [] / Success.
 Proof.
-  (* TODO *)
+  eapply E_Seq.
+    - apply E_Asg. reflexivity.
+    - apply E_IfFalse.
+      -- reflexivity.
+      -- apply E_Asg. reflexivity.
 Qed.
 
 
