@@ -121,7 +121,8 @@ empty_st / [] =[
 Proof.
   eapply E_Seq.
     - apply E_Asg. reflexivity.
-    - apply E_FalseEmpty. reflexivity.
+    - apply E_FalseEmpty.
+    - reflexivity.
 Qed. 
 
 Example ceval_example_guard2:
@@ -214,39 +215,33 @@ Lemma cequiv_ex2:
 <{ (X := 1 !! X := 2); X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
- split.
-  - unfold cequiv_imp. intros.
-    inversion H; subst.
-    inversion H2; subst; simpl in H2. 
-    inversion H9; subst; simpl in H9.
-    inversion H8; subst; simpl in H8.
-    inversion H11; subst; simpl in H11.
+  split; intros st1 st2 q1 q2 r H.
     
-    -- discriminate.
+    inversion H; subst. 
+    inversion H2; subst.
     
-    -- inversion H14; subst. 
-       inversion H4; subst.
-       inversion H5; subst.
-       eexists.
-       eapply E_Asg. reflexivity.
-    -- inversion H9; subst; simpl in H9.
-       inversion H8; subst.
-       eexists.
-      
+      inversion H9; subst.    
+      inversion H8; subst.
       --- inversion H11; subst.
-          inversion H3; subst.
-          eapply E_Asg. reflexivity.
-      
-      --- discriminate.  
-  - eexists.
-    inversion H; subst; simpl in H.
-    simpl.
-    eapply E_Seq.
-    -- eapply E_NDet2. 
-       eapply E_Asg. reflexivity.
-    -- eapply E_GuardTrue; 
-       try reflexivity.
-       eapply E_Skip.
+          discriminate.
+      ---  inversion H13; subst.
+          inversion H14; subst.
+          inversion H6; subst.
+          ---- eexists. apply E_Asg. reflexivity.
+          ---- discriminate.
+    -- 
+      inversion H8; subst.    
+      ---  inversion H11; subst. inversion H8; subst.
+        ---- inversion H9; subst. eexists. apply E_Asg. reflexivity.
+        ---- inversion H9; subst. eexists. apply E_Asg. reflexivity.
+      ---  inversion H9; subst. 
+          ---- discriminate.
+   -  inversion H; subst.
+    eexists.
+     eapply E_Seq .
+      --  apply E_NDet2. apply E_Ass. reflexivity.
+      --  apply E_GuardTrue. reflexivity.
+    apply E_Skip.
 Qed.
 
 
