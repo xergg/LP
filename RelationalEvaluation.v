@@ -195,28 +195,27 @@ Lemma cequiv_ex1:
 <{ X := 2; X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-  split. 
-  - eexists.
-  investion H; subst.
-  inversion H2; subst.
-  inversion H8; subst.
-  -- inversion H10; subst.
-  eapply E_Asg. reflexivity.
-  -- simpl in H9. discriminate.
-  -- discriminate.
-  - inversion H; subst.
-  eapply E_Seq.
-  - apply E_Asg. simpl. reflexivity.
-  -- apply E_GuardTrue.
-  --- reflexivity.
-  --- apply E_Skip.
+split; eexists.
+    inversion H; subst.
+      inversion H2; subst. 
+      inversion H8; subst. 
+      -- inversion H10; subst. 
+          eapply E_Asg. reflexivity.
+      -- (simpl in H9. discriminate.
+      -- discriminate.
+  - inversion H; subst. 
+    eapply E_Seq . 
+      -- apply E_Asg. simpl. reflexivity. 
+      -- apply E_CondGuardTrue.
+        ---  simpl. reflexivity. 
+        ---  apply E_Skip.
 Qed.
 
 Lemma cequiv_ex2:
 <{ (X := 1 !! X := 2); X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-  split.
+ split.
   - unfold cequiv_imp. intros.
     inversion H; subst.
     inversion H2; subst; simpl in H2. 
@@ -230,22 +229,22 @@ Proof.
        inversion H4; subst.
        inversion H5; subst.
        eexists.
-       eapply E_Asng. reflexivity.
+       eapply E_Asg. reflexivity.
     -- inversion H9; subst; simpl in H9.
        inversion H8; subst.
        eexists.
       
       --- inversion H11; subst.
           inversion H3; subst.
-          eapply E_Asng. reflexivity.
+          eapply E_Asg. reflexivity.
       
       --- discriminate.  
   - eexists.
     inversion H; subst; simpl in H.
     simpl.
     eapply E_Seq.
-    -- eapply E_Choice2. 
-       eapply E_Asng. reflexivity.
+    -- eapply E_NDet2. 
+       eapply E_Asg. reflexivity.
     -- eapply E_GuardTrue; 
        try reflexivity.
        eapply E_Skip.
