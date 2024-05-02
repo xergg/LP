@@ -34,6 +34,58 @@ Inductive ceval : com -> state -> list (state * com) ->
           result -> state -> list (state * com) -> Prop :=
 | E_Skip : forall st q,
  st / q =[ skip ]=> st / q / Success
+
+| E_Ass  : forall st a1 n x q,
+  aeval st a1 = n ->
+  st / q =[ x := a1 ]=> (x !-> n; st) / q / Success
+
+| E_Seq : forall c1 c2 st st' st'' q q1 q2 r,
+  st / q =[ c1 ]=> st' / q1 / Success ->
+  st' / q1 =[ c2 ]=> st'' / q2 / r ->
+  st / q =[ c1 ; c2 ]=> st'' / q2 / r
+
+| E_IfTrue : forall st st' b c1 c2 q q1,
+  beval st b = true ->
+  st / q =[ c1 ]=> st' / q1 / Success ->
+  st / q =[ if b then c1 else c2 end ]=> st' / q1 / Success
+
+| E_IfFalse : forall st st' b c1 c2 q q1,
+  beval st b = false ->
+  st / q =[ c2 ]=> st' / q1 / Success ->
+  st / q =[ if b then c1 else c2 end ]=> st' / q1 / Success
+
+| E_WhileEnd : forall b st c q,
+  beval st b = false ->
+  st / q =[ while b do c end ]=> st / q / Success
+
+| E_WhileLoop : forall st st' st'' b c q q1 q2,
+  beval st b = true ->
+  st / q =[ c ]=> st' / q1 / Success ->
+  st' / q1 =[ while b do c end ]=> st'' / q2 / Success ->
+  st / q =[ while b do c end ]=> st'' / q2 / Success
+
+| E_NonDet : forall st st' q q' c1 c2 r,
+  st / q =[ c1 ]=> st' / q' / r ->
+  st / q =[ c1 !! c2 ]=> st' / ((st,c2) :: q') / r
+
+| E_NonDet2 : forall st st' q q' c1 c2 r,
+  st / q =[ c2 ]=> st' / q' / r ->
+  st / q =[ c1 !! c2 ]=> st' / ((st,c1) :: q') / r
+
+| E_CondGuardTrue : forall st st' b c1 q q1,
+  beval st b = true ->
+  st / q =[ c1 ]=> st' / q1 / Success ->
+  st / q =[ b -> c1 ]=> st' / q1 / Success
+
+| E_CondGuardFalse1 : forall st st' b c1,
+  beval st b = false ->
+  st / [] =[ b -> c1 ]=> st' / [] / Fail
+
+| E_CondGuardFalse2 : forall st st1 st2 st3 d b c q q2 q3,
+  beval st b = false ->
+  st1 / q =[ d ]=> st2 / q2 / Success ->
+  st2 / q2 =[ b -> c ]=> st3 / q3 / Success ->
+  st / ((st1, d) :: q) =[  b -> c  ]=> st3 / q3 / Success
 (* TODO. Hint: follow the same structure as shown in the chapter Imp *)
 where "st1 '/' q1 '=[' c ']=>' st2 '/' q2 '/' r" := (ceval c st1 q1 r st2 q2).
 
