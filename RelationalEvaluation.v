@@ -144,14 +144,15 @@ empty_st / [] =[
    (X = 2) -> X:=3
 ]=> (X !-> 3) / q / Success.
 Proof.
-  eexists.
-  eapply E_Seq.
-    - apply E_NDet2.
-      apply E_Asg. reflexivity.
-    - replace (X !-> 3) with (X !-> 3; X !-> 2); try apply t_update_shadow.
-    - apply E_GuardTrue.
+ eexists.
+ eapply E_Seq.
+  - apply E_NDet2.
+    apply E_Asg. reflexivity.
+  - apply E_GuardTrue.
     -- reflexivity.
-    -- apply E_Asg. reflexivity.
+    -- assert ((X!->3 ; X!->2)=(X!->3)) by (apply t_update_shadow).
+       rewrite <- H.
+       apply E_Asg. reflexivity.
 Qed.
     
 Example ceval_example_guard4: exists q,
@@ -160,16 +161,14 @@ empty_st / [] =[
    (X = 2) -> X:=3
 ]=> (X !-> 3) / q / Success.
 Proof.
-  eexists.
-  eapply E_Seq.
-  - apply E_NDet.
-    apply E_Asg. reflexivity.
-    - eapply E_GuardFalse
-      -- simpl. reflexivity.
-      -- apply E_Asg. reflexivity.
-      -- apply E_GuardTrue. reflexivity.
-      --- replace (X !-> 3) with (X !-> 3; X !-> 2); try apply t_update_shadow. (* for correct state update *)
-          apply E_Asg. simpl. reflexivity.
+eexists.
+eapply E_Seq.
+  - apply E_NDet2. apply E_Asg. reflexivity.
+  - eapply E_GuardTrue; try reflexivity.
+    -- assert ((X!->3 ; X!->2)=(X!->3)) by (apply t_update_shadow).
+       rewrite <- H.
+       apply E_Asg.
+       reflexivity.
 Qed.
 
 
@@ -196,7 +195,10 @@ Lemma cequiv_ex1:
 <{ X := 2; X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-  (* TODO *)
+  split. 
+  - eexists.
+  investion H. subst.
+  inversion H2. subst.
 Qed.
 
 Lemma cequiv_ex2:
