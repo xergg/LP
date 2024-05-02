@@ -60,7 +60,7 @@ Inductive ceval : com -> state -> list (state * com) ->
 
 | E_WL : forall st st' st'' b c q q' q'',
   beval st b = true ->
-  st / q =[ c ]=> st' / q1 / Success ->
+  st / q =[ c ]=> st' / q' / Success ->
   st' / q' =[ while b do c end ]=> st'' / q'' / Success ->
   st / q =[ while b do c end ]=> st'' / q'' / Success
 
@@ -84,7 +84,7 @@ Inductive ceval : com -> state -> list (state * com) ->
 | E_GuardFalse : forall st st' st'' st''' d b c q q' q'',
   beval st b = false ->
   st' / q =[ d ]=> st'' / q' / Success ->
-  st2 / q' =[ b -> c ]=> st''' / q'' / Success ->
+  st'' / q' =[ b -> c ]=> st''' / q'' / Success ->
   st / ((st', d) :: q) =[  b -> c  ]=> st''' / q'' / Success
 (* TODO. Hint: follow the same structure as shown in the chapter Imp *)
 where "st1 '/' q1 '=[' c ']=>' st2 '/' q2 '/' r" := (ceval c st1 q1 r st2 q2).
