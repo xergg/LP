@@ -197,46 +197,156 @@ Lemma cequiv_ex1:
 Proof.
   split. 
   - eexists.
-  investion H. subst.
-  inversion H2. subst.
+  investion H; subst.
+  inversion H2; subst.
+  inversion H8; subst.
+  -- inversion H10; subst.
+  eapply E_Asg. reflexivity.
+  -- simpl in H9. discriminate.
+  -- discriminate.
+  - inversion H; subst.
+  eapply E_Seq.
+  - apply E_Asg. simpl. reflexivity.
+  -- apply E_GuardTrue.
+  --- reflexivity.
+  --- apply E_Skip.
 Qed.
 
 Lemma cequiv_ex2:
 <{ (X := 1 !! X := 2); X = 2 -> skip }> == 
 <{ X := 2 }>.
 Proof.
-  (* TODO *)
+  split.
+  - unfold cequiv_imp. intros.
+    inversion H; subst.
+    inversion H2; subst; simpl in H2. 
+    inversion H9; subst; simpl in H9.
+    inversion H8; subst; simpl in H8.
+    inversion H11; subst; simpl in H11.
+    
+    -- discriminate.
+    
+    -- inversion H14; subst. 
+       inversion H4; subst.
+       inversion H5; subst.
+       eexists.
+       eapply E_Asng. reflexivity.
+    -- inversion H9; subst; simpl in H9.
+       inversion H8; subst.
+       eexists.
+      
+      --- inversion H11; subst.
+          inversion H3; subst.
+          eapply E_Asng. reflexivity.
+      
+      --- discriminate.  
+  - eexists.
+    inversion H; subst; simpl in H.
+    simpl.
+    eapply E_Seq.
+    -- eapply E_Choice2. 
+       eapply E_Asng. reflexivity.
+    -- eapply E_GuardTrue; 
+       try reflexivity.
+       eapply E_Skip.
 Qed.
 
 
 Lemma choice_idempotent: forall c,
 <{ c !! c }> == <{ c }>.
 Proof.
-  (* TODO *)
+  split; unfold cequiv_imp; intros.
+  - inversion H; subst; eexists; eassumption.
+  - inversion H; subst; eexists; apply E_NDet; eassumption.
 Qed.
 
 Lemma choice_comm: forall c1 c2,
 <{ c1 !! c2 }> == <{ c2 !! c1 }>.
 Proof.
-  (* TODO *)
+  split; unfold cequiv_imp; intros.
+  - inversion H; subst. 
+    -- eexists. 
+       eapply E_NDet2. 
+       eassumption.
+    -- eexists. 
+       eapply E_NDet. 
+       eassumption.
+  - inversion H; subst. 
+    -- eexists. 
+       eapply E_NDet2. 
+       eassumption.
+    -- eexists. 
+       eapply E_NDet. 
+       eassumption.
 Qed.
 
 Lemma choice_assoc: forall c1 c2 c3,
 <{ (c1 !! c2) !! c3 }> == <{ c1 !! (c2 !! c3) }>.
 Proof.
-  (* TODO *)
+split; unfold cequiv_imp; intros.
+  - inversion H; subst.
+    inversion H7; subst.
+    -- eexists.  
+       eapply E_NDet.
+       eassumption.
+    -- eexists.
+       eapply E_NDet2.
+       eapply E_NDet. 
+       eassumption.
+    -- eexists.
+       eapply E_NDet2.
+       eapply E_NDet2.
+       eassumption.
+  - inversion H; subst.
+    -- eexists.
+       eapply E_NDet.
+       eapply E_NDet.
+       eassumption.
+    -- inversion H7; subst.
+      --- eexists.
+          eapply E_NDet.
+          eapply E_NDet2.
+          eassumption.
+      --- eexists.
+          eapply E_NDet2.
+          eassumption.   
 Qed.
 
 
 Lemma choice_seq_distr_l: forall c1 c2 c3,
 <{ c1 ; (c2 !! c3)}> == <{ (c1;c2) !! (c1;c3) }>.
 Proof.
-  (* TODO *)
+  split; unfold cequiv_imp; intros.
+  - inversion H; subst.
+    inversion H8; subst.
+    -- eexists.
+       apply E_NDet.
+       eapply E_Seq;
+       eassumption.
+    -- eexists. 
+       apply E_NDet2.
+       eapply E_Seq;
+       eassumption.
+  - inversion H; subst.
+    inversion H7; subst.
+    -- eexists.
+       eapply E_Seq;
+       try eassumption.
+      --- eapply E_NDet.
+          eassumption.
+    -- inversion H7; subst.
+       eexists.
+       eapply E_Seq.
+      ---  eassumption.
+      ---  apply E_NDet2.
+           eassumption.
 Qed.
 
 Lemma choice_congruence: forall c1 c1' c2 c2',
 c1 == c1' -> c2 == c2' ->
 <{ c1 !! c2 }> == <{ c1' !! c2' }>.
 Proof.
-  (* TODO *)
+  split; intros s1 s2 q1 q2 r H3; inversion H3; subst; 
+  repeat(apply H in H9; induction H9; eexists; apply E_NDet; apply H1);
+  repeat(apply H0 in H9; induction H9; eexists; apply E_NDet2; apply H1).
 Qed.
