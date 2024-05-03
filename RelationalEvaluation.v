@@ -218,28 +218,21 @@ Lemma cequiv_ex2:
 Proof.
 split.
   - unfold cequiv_imp. intros.
-    inversion H; subst.
-    inversion H2; subst; simpl in H2. 
-    inversion H9; subst; simpl in H9.
-    inversion H8; subst; simpl in H8.
-    inversion H11; subst; simpl in H11.
-    (* Choice 1 - Guard true *)
-    -- discriminate.
-    (* Choice 1 - Guard false *)
-    -- inversion H14; subst. 
-       inversion H4; subst.
-       inversion H5; subst.
-       eexists.
-       eapply Asg. reflexivity.
-    -- inversion H9; subst; simpl in H9.
+    inversion H. subst.
+    inversion H2; subst; simpl in H2.
+    -- eexists. inversion H9. subst.
        inversion H8; subst.
-       eexists.
-      (* Choice 2 - Guard true *)
-      --- inversion H11; subst.
-          inversion H3; subst.
-          eapply E_Asg. reflexivity.
-      (* Choice 2 - Guard false *)
-      --- discriminate.  
+       --- inversion H11; subst. discriminate.
+       --- inversion H13; subst.
+           inversion H14; subst.
+           ---- inversion H6; subst. apply E_Asg. reflexivity.
+           ---- inversion H7; subst; discriminate.
+    -- eexists. inversion H9; subst.
+       inversion H8; subst.
+       --- inversion H11; subst. inversion H8; subst.
+           * apply E_Asg. reflexivity.
+           * apply E_Asg. reflexivity.
+       ---  discriminate.
   - eexists.
     inversion H; subst; simpl in H.
     simpl.
