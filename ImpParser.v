@@ -386,6 +386,17 @@ Fixpoint parseSimpleCommand (steps:nat)
         ' (e, rest') <- firstExpect ":=" (parseAExp steps') rest ;;
         SomeE (<{i := e}>, rest')
     OR
+    TRY ' (c, rest) <- (parseSequencedCommand steps') xs ;;
+        ' (c', rest') <- firstExpect "!!" (parseSequencedCommand steps') rest ;;
+        SomeE (<{c !! c'}>, rest')
+    OR
+    TRY ' (e, rest) <-
+            (parseBExp steps') xs ;;
+        ' (c, rest') <-
+            firstExpect "->"
+                        (parseSequencedCommand steps') rest ;;
+        SomeE (<{e -> c}>, rest')
+    OR
         NoneE "Expecting a command"
 end
 
@@ -460,6 +471,15 @@ Example eg2 : parse "
         skip
       end;
       "x" := "z" }>.
+Proof. cbv. reflexivity. Qed.
+
+Example eg3 : parse "
+  (x := 1 !! x := 2);
+  x = 2 -> res := 42  "
+=
+  SomeE <{
+      ("x" := 1 !! "x" := 2);
+      "x" = 2 -> "res" := 42 }>.
 Proof. cbv. reflexivity. Qed.
 
 (* 2023-12-29 17:12 *)
