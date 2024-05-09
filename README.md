@@ -14,6 +14,8 @@
 - Implemented the **behavioral equivalence** (**cequiv**) in order to define some equivalence properties of our program. The *lemmas* defined are: **cequiv_ex1**, **cequiv_ex2**, **choice_idempotent**, **choice_comm**, **choice_seq_distr_l** and **choice_congruence**
 - Updated the parser *ImpParser.v* in order for the interpreter to recognize and parse our implemented constructs (**non-deterministic choice** and a **conditional guard**)
   
+**TL;DR:** We implemented everything asked of us in the part_1 of the project essay.
+
 
 # Extras
 No extra functionalities have yet been implemented.
