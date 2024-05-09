@@ -386,9 +386,15 @@ Fixpoint parseSimpleCommand (steps:nat)
         ' (e, rest') <- firstExpect ":=" (parseAExp steps') rest ;;
         SomeE (<{i := e}>, rest')
     OR
-    TRY ' (c, rest) <- (parseSequencedCommand steps') xs ;;
-        ' (c', rest') <- firstExpect "!!" (parseSequencedCommand steps') rest ;;
-        SomeE (<{c !! c'}>, rest')
+    TRY ' (c1,rest) <-
+            firstExpect "("
+                        (parseSequencedCommand steps') xs ;;
+        ' (c2,rest') <-
+            firstExpect "!!"
+                        (parseSequencedCommand steps') rest ;;
+        ' (tt,rest'') <-
+            expect ")" rest' ;;
+       SomeE(<{(c1!!c2)}>, rest'')
     OR
     TRY ' (e, rest) <-
             (parseBExp steps') xs ;;
