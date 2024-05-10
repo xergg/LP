@@ -1,0 +1,14 @@
+x := 6;
+y :=5;
+while ~(x=1) do
+    if (y=2) then
+      res := y*(x+res)+res;
+      y:=y-1
+    else
+        res:= res+x;
+        x := x-1;
+        y:=y-1
+    end
+
+    
+end
